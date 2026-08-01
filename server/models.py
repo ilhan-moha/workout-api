@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import CheckConstraint
 from sqlalchemy.orm import validates
 
 db = SQLAlchemy()
@@ -16,9 +17,9 @@ workout_exercises = db.relationship(
       cascade="all, delete-orphan")
 
 __table_args__ = (
-    checkConstraint("length(name) > 0", name = "check_exercise_name"),
+    CheckConstraint("length(name) >= 3", name="check_exercise_name"),
+    )
 
-)
 
 @validates("name")
 def validate_name(self, key, value):
@@ -31,3 +32,32 @@ def validate_category(self, key, value):
     if not value.strip():
         raise ValueError("Category cannot be empty.")
     return value.strip()
+
+class Workout(db.Model):
+    __tablename__ = "workouts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    notes = db.Column(db.String, nullable=True)
+
+    workout_exercises = db.relationship(
+        "WorkoutExercise", back_populates="workout",
+        cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        CheckConstraint("duration_minutes > 0", name="check_duration"),
+    )
+
+    @validates("duration_minutes")
+    def validate_duration(self, key, value):
+        if value <= 0:
+            raise ValueError( "duration must be greater than 0.")
+        return value
+
+    @validates("notes")
+    def validate_notes(self, key, value):
+        if value and len(value) < 500:
+            raise ValueError("Notes cannot exceed 500 characters.")
+        return value
