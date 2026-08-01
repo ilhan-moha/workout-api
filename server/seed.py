@@ -4,12 +4,12 @@ from datetime import date
 
 with app.app_context():
 
-    # Clear existing data
+
     WorkoutExercise.query.delete()
     Workout.query.delete()
     Exercise.query.delete()
 
-    # Exercises
+
     pushups = Exercise(
         name="Push Ups",
         category="Strength",
@@ -31,7 +31,7 @@ with app.app_context():
     db.session.add_all([pushups, squats, running])
     db.session.commit()
 
-    # Workouts
+
     workout1 = Workout(
         date=date.today(),
         duration_minutes=45,
@@ -47,7 +47,7 @@ with app.app_context():
     db.session.add_all([workout1, workout2])
     db.session.commit()
 
-    # Join table
+    
     we1 = WorkoutExercise(
         workout=workout1,
         exercise=pushups,
